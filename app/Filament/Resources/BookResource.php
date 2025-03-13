@@ -23,10 +23,23 @@ class BookResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->canAny([
+            'view_book',
+            'create_book',
+            'update_book',
+            'delete_book',
+            'create_section',
+            'edit_section',
+            'delete_section',
+        ]);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
-        ->schema(static::getFormSchema());
+            ->schema(static::getFormSchema());
     }
 
     public static function table(Table $table): Table
@@ -41,15 +54,23 @@ class BookResource extends Resource
                 TrashedFilter::make()
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (Book $record) => auth()->user()->can('update_book')),
                 Action::make('manage')
                     ->label('Manage')
                     ->url(fn (Book $record): string => static::getUrl('manage', ['record' => $record]))
-                    ->icon('heroicon-o-document-text'),
+                    ->icon('heroicon-o-document-text')
+                    ->visible(fn (Book $record) => auth()->user()->canAny([
+                        'update_book',
+                        'create_section',
+                        'edit_section',
+                        'delete_section',
+                    ])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete_book')),
                 ]),
             ]);
     }

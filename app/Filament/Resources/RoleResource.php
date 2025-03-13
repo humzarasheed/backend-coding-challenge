@@ -15,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -162,12 +161,12 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()->role === RoleEnum::AUTHOR->value;
+        return auth()->user()->hasRole(RoleEnum::AUTHOR);
     }
 
     public static function canAccess(): bool
     {
-        return Auth::user()->role === RoleEnum::AUTHOR->value;
+        return auth()->user()->hasRole(RoleEnum::AUTHOR);
     }
 
     public static function getNavigationGroup(): ?string
